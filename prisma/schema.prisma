@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  posts     Post[]
+  profile   Profile?
+}
+
+model Profile {
+  id                  Int     @id @default(autoincrement())
+  bio                 String?
+  profilePic          String?
+  profilePicThumbnail String?
+  profileUserName     String  @default("Anonymous")
+  address             String?
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              Int     @unique
+}
+
+model Post {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String?
+  createdAt   DateTime  @default(now())
+  publishedAt DateTime?
+  published   Boolean   @default(false)
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    Int
+}
+
+// comments mygarden seeding
