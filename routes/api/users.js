@@ -22,6 +22,13 @@ const nameExists = async (name) => {
   }
 };
 
+// @route   POST api/users
+// @desc    Login User With JWT
+// @access  Public
+router.get("/", auth, (req, res) => {
+  return res.json({ token: req.token });
+});
+
 router.post(
   "/CreateUser",
   [
@@ -38,7 +45,6 @@ router.post(
     }
 
     const { name, email, password } = req.body;
-
     try {
       // see if the user exists
       const errors = await Promise.all([
