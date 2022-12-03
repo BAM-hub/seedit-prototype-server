@@ -185,10 +185,24 @@ router.post(
     }
     try {
       const { email, password } = req.body;
-
       const user = await prisma.user.findUnique({
         where: {
-          email,
+          email: email,
+        },
+        select: {
+          email: true,
+          name: true,
+          createdAt: true,
+          password: true,
+          profile: {
+            select: {
+              profilePicThumbnail: true,
+              profilePic: true,
+              bio: true,
+              profileUserName: true,
+              address: true,
+            },
+          },
         },
       });
 
@@ -212,17 +226,16 @@ router.post(
         },
       };
 
-      jwt.sign(
-        payload,
-        process.env.jwtSecret,
-        { expiresIn: 36000 },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token });
-        }
-      );
+      const token = jwt.sign(payload, process.env.jwtSecret, {
+        expiresIn: 36000,
+      });
+      delete user.password;
+      return res.json({
+        token,
+        user,
+      });
     } catch (error) {
-      console.error(err.message);
+      console.error(error);
       res.status(500).send("server error");
     }
   }
