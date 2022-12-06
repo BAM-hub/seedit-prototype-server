@@ -14,7 +14,7 @@ cloudinary.config({
   secure: true,
 });
 
-const memoryStorage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
@@ -23,7 +23,8 @@ const memoryStorage = multer.diskStorage({
     cb(null, file.fieldname + "-" + uniqueSuffix);
   },
 });
-const upload = multer({ storage: memoryStorage });
+
+const upload = multer({ storage: storage });
 
 const uploadImage = async (imagePath) => {
   return await cloudinary.uploader.upload(imagePath, {
@@ -36,17 +37,40 @@ const uploadImage = async (imagePath) => {
   });
 };
 
-router.post("/uploadImage", auth, upload.single("image"), async (req, res) => {
-  const upload = await uploadImage(req.file.path);
-
-  fs.unlink(req.file.path, (err) => {
-    if (err) {
-      return;
+router.post(
+  "/uploadProfileImage/:id",
+  auth,
+  upload.single("image"),
+  async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (req.userId !== id) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) {
+          console.log(err);
+        }
+      });
+      return res.status(401).json({ msg: "Not authorized" });
     }
-  });
+    const upload = await uploadImage(req.file.path);
+    const { responsive_breakpoints } = upload;
+    fs.unlink(req.file.path, (err) => {
+      if (err) {
+        console.log(err);
+      }
+    });
+    const profile = await prisma.profile.update({
+      where: {
+        userId: id,
+      },
+      data: {
+        profilePic: responsive_breakpoints[0].breakpoints[0].url,
+        profilePicThumbnail: responsive_breakpoints[0].breakpoints[1].url,
+      },
+    });
 
-  return res.json({ upload });
-});
+    return res.json({ profile });
+  }
+);
 
 router.post(
   "/CreateProfile",
