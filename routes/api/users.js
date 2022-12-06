@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
 const auth = require("../../middleware/auth");
+const refresToken = require("../../middleware/refreshToken");
 require("dotenv").config();
 
 const prisma = new PrismaClient();
@@ -25,8 +26,9 @@ const nameExists = async (name) => {
 // @route   POST api/users
 // @desc    Login User With JWT
 // @access  Public
-router.get("/", auth, (req, res) => {
-  return res.json({ token: req.token });
+router.get("/", refresToken, (req, res) => {
+  console.log(req.userId);
+  return res.json({ token: req.token, userId: req.userId });
 });
 
 router.post(
@@ -190,12 +192,14 @@ router.post(
           email: email,
         },
         select: {
+          id: true,
           email: true,
           name: true,
           createdAt: true,
           password: true,
           profile: {
             select: {
+              id: true,
               profilePicThumbnail: true,
               profilePic: true,
               bio: true,
