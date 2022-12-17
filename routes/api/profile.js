@@ -118,5 +118,21 @@ router.post(
     }
   }
 );
-
+router.get("/getProfile/:id", auth, async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    const profile = await prisma.profile.findUnique({
+      where: {
+        userId: id,
+      },
+    });
+    if (!profile) {
+      return res.status(400).json({ msg: "Profile not found" });
+    }
+    res.json(profile);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 module.exports = router;
