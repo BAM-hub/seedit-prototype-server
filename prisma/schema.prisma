@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -40,6 +40,25 @@ model Post {
   published   Boolean   @default(false)
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId    Int
+}
+
+model Plants {
+  id             Int     @id @default(autoincrement())
+  commonName     String?
+  botanicalName  String?
+  Family         String?
+  plantType      String?
+  size           String?
+  soilType       String?
+  soilPH         String?
+  hardinessZones String?
+  nativeArea     String?
+  image          String?
+  site           String?
+  matureSize     String?
+  bloomTime      String?
+  flowerColor    String?
+  toxicity       String?
 }
 
 // comments mygarden seeding
