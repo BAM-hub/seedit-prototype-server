@@ -7,6 +7,7 @@ const multer = require("multer");
 const { PrismaClient } = require("@prisma/client");
 const auth = require("../../middleware/auth");
 const fs = require("fs");
+const accessControl = require("../../middleware/accessControl");
 require("dotenv").config();
 
 const prisma = new PrismaClient();
@@ -43,6 +44,7 @@ router.post(
   upload.single("image"),
   async (req, res) => {
     const id = parseInt(req.params.id);
+    console.log(req.userId, "uploadProfileImage");
     if (req.userId !== id) {
       fs.unlink(req.file.path, (err) => {
         if (err) {
@@ -51,6 +53,7 @@ router.post(
       });
       return res.status(401).json({ msg: "Not authorized" });
     }
+    console.log(req.file);
     const upload = await uploadImage(req.file.path);
     const { responsive_breakpoints } = upload;
     fs.unlink(req.file.path, (err) => {
@@ -118,6 +121,48 @@ router.post(
     }
   }
 );
+
+router.put(
+  "/UpdateProfile/:id",
+  auth,
+  accessControl,
+  [check("profileUserName", "user name is required").not().isEmpty()],
+  async (req, res) => {
+    const { userId } = req;
+    const { bio, profileUserName, address } = req.body;
+    if (!validationResult(req).isEmpty()) {
+      console.log(validationResult(req));
+      return res.status(400).json({ msg: "Invalid data" });
+    }
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+
+      if (!user) {
+        return res.status(400).json({ msg: "User not found" });
+      }
+
+      const profile = await prisma.profile.update({
+        where: {
+          userId: userId,
+        },
+        data: {
+          bio,
+          profileUserName,
+          address,
+        },
+      });
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server Error");
+    }
+  }
+);
+
 router.get("/getProfile/:id", auth, async (req, res) => {
   const id = parseInt(req.params.id);
   try {
