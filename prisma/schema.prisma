@@ -11,13 +11,15 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  posts     Post[]
-  profile   Profile?
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  name           String           @unique
+  password       String
+  createdAt      DateTime         @default(now())
+  posts          Post[]
+  profile        Profile?
+  pserActions    PostActions[]
+  CommentActions CommentActions[]
 }
 
 model Profile {
@@ -32,15 +34,68 @@ model Profile {
 }
 
 model Post {
-  id          Int       @id @default(autoincrement())
-  title       String
-  content     String?
-  createdAt   DateTime  @default(now())
-  publishedAt DateTime?
-  published   Boolean   @default(false)
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId    Int
+  id             Int              @id @default(autoincrement())
+  title          String
+  content        String?
+  image          String?
+  createdAt      DateTime         @default(now())
+  publishedAt    DateTime?
+  published      Boolean          @default(false)
+  author         User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId       Int
+  upVote         Int              @default(0)
+  downVote       Int              @default(0)
+  comment        Comment[]
+  opserActions   PostActions[]
+  CommentActions CommentActions[]
 }
+
+model Comment {
+  id             Int              @id @default(autoincrement())
+  postId         Int              @unique
+  post           Post             @relation(fields: [postId], references: [id])
+  text           String
+  upVote         Int              @default(0)
+  downVote       Int              @default(0)
+  pserActions    PostActions[]
+  CommentActions CommentActions[]
+}
+
+model PostActions {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  upVote    Boolean?
+  downVote  Boolean?
+  Comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId Int?
+}
+
+model CommentActions {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId Int
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  upVote    Boolean?
+  downVote  Boolean?
+}
+
+// model Garden {
+//   id             Int     @id @default(autoincrement())
+//   gardenName     String?
+//   gardenLocation String?
+//   gardenSize     String?
+//   gardenType     String?
+//   gardenSoilType String?
+//   gardenSoilPH   String?
+//   gardenImage    String?
+//   gardenPlants   Plants[]
+// }
 
 model Plants {
   id             Int     @id @default(autoincrement())
