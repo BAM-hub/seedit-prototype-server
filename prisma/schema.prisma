@@ -18,7 +18,7 @@ model User {
   createdAt      DateTime         @default(now())
   posts          Post[]
   profile        Profile?
-  pserActions    PostActions[]
+  postActions    PostActions[]
   CommentActions CommentActions[]
 }
 
@@ -46,7 +46,7 @@ model Post {
   upVote         Int              @default(0)
   downVote       Int              @default(0)
   comment        Comment[]
-  opserActions   PostActions[]
+  postActions   PostActions[]
   CommentActions CommentActions[]
 }
 
@@ -57,7 +57,7 @@ model Comment {
   text           String
   upVote         Int              @default(0)
   downVote       Int              @default(0)
-  pserActions    PostActions[]
+  postActions    PostActions[]
   CommentActions CommentActions[]
 }
 

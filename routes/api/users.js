@@ -26,9 +26,38 @@ const nameExists = async (name) => {
 // @route   POST api/users
 // @desc    Login User With JWT
 // @access  Public
-router.get("/", refresToken, (req, res) => {
+router.get("/", refresToken, async (req, res) => {
   console.log(req.userId);
-  return res.json({ token: req.token, userId: req.userId });
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.userId,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        profile: {
+          select: {
+            id: true,
+            profilePicThumbnail: true,
+            profilePic: true,
+            bio: true,
+            profileUserName: true,
+            address: true,
+          },
+        },
+      },
+    });
+    if (!user) {
+      return res.status(400).json({ msg: "User not found" });
+    }
+
+    return res.json({ token: req.token, user });
+  } catch (error) {
+    return res.status(500).json({ msg: "Server Error" });
+  }
 });
 
 router.post(

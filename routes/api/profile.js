@@ -40,19 +40,22 @@ const uploadImage = async (imagePath) => {
 
 router.post(
   "/uploadProfileImage/:id",
-  auth,
+
   upload.single("image"),
   async (req, res) => {
+    // console.log(req.body);
     const id = parseInt(req.params.id);
+    if (!id) return res.status(400).json({ msg: "User not found" });
     console.log(req.userId, "uploadProfileImage");
-    if (req.userId !== id) {
-      fs.unlink(req.file.path, (err) => {
-        if (err) {
-          console.log(err);
-        }
-      });
-      return res.status(401).json({ msg: "Not authorized" });
-    }
+
+    // if (req.userId !== id) {
+    //   fs.unlink(req.file.path, (err) => {
+    //     if (err) {
+    //       console.log(err);
+    //     }
+    //   });
+    //   return res.status(401).json({ msg: "Not authorized" });
+    // }
     console.log(req.file);
     const upload = await uploadImage(req.file.path);
     const { responsive_breakpoints } = upload;
@@ -164,6 +167,7 @@ router.put(
 );
 
 router.get("/getProfile/:id", auth, async (req, res) => {
+  console.log(req.userId, "getProfile");
   const id = parseInt(req.params.id);
   try {
     const profile = await prisma.profile.findUnique({

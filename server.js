@@ -15,12 +15,14 @@ async function main() {
   }
   app.use(express.json({ extended: false }));
   app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
   app.use(methodOverride());
 
   //   app.use(bodyParser.form);
   app.use("/api/users", require("./routes/api/users"));
   //   app.use("/api/auth", require("./routes/api/auth"));
   app.use("/api/profile", require("./routes/api/profile"));
+  app.use("/api/post", require("./routes/api/post"));
 
   server.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
